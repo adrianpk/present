@@ -7,11 +7,8 @@ import (
 
 // START OMIT
 var counter int
-var mutex sync.Mutex // HL
 
 func increment() {
-	mutex.Lock()         // Acquire the lock // HL
-	defer mutex.Unlock() // Ensure the lock is released even if panic occurs // HL
 	counter++
 }
 

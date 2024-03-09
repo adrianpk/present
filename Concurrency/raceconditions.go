@@ -11,7 +11,7 @@ func main() {
 
 	for i := 0; i < 1000; i++ {
 		go func() {
-			counter++ // Counter is incremented by multiple goroutines whitout synchronization // HL
+			counter++ // Counter is incremented by multiple goroutines whitout synchronization
 		}()
 	}
 
