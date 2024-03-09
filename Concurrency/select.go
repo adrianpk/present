@@ -1,3 +1,5 @@
+// Select
+
 package main
 
 import (
@@ -5,8 +7,8 @@ import (
 	"time"
 )
 
+// START OMIT
 func main() {
-	// START OMIT
 	ch1 := make(chan string)
 	ch2 := make(chan string)
 
@@ -32,5 +34,6 @@ func main() {
 			fmt.Println("Received message from ch2:", msg2)
 		}
 	}
-	// END OMIT
 }
+
+// END OMIT

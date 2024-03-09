@@ -31,7 +31,7 @@ me@adrianpk.com
 
 .link https://go.dev/play/p/AqwubODp_Zp  Go Playground
 
-.code ./goroutinesnamed.go
+.code ./goroutinesnamed.go /START OMIT/,/END OMIT/
 
 
 ## Channels
@@ -50,12 +50,23 @@ me@adrianpk.com
 
 ## Channel - Unbuffered
 
-.link https://go.dev/play/p/424qZnSeegV Go Playground
-.code ./channelsbuffered.go
+.link https://go.dev/play/p/L-UdGCYGZoh Go Playground
+.code ./channelsunbuffered.go /START OMIT/,/END OMIT/
+
+- Program creates buffered channel with capacity 1.
+- Sends data to channel asynchronously without immediate blocking.
+- Blocks when attempting to receive data.
+- Frees immediately after receiving and prints it.
+
 
 ## Channel - Buffered
 
-.code ./channelsbuffered.go
+.link https://go.dev/play/p/m3OIbwk9zdH Go Playground
+.code ./channelsbuffered.go /START OMIT/,/END OMIT/
+
+- Program creates an unbuffered channel with a buffer of 10.
+- Sends 10 values to the channel asynchronously without immediate blocking, potentially saturating the buffer.
+- Program blocks when attempting to receive data, waiting for values to become available, and then prints each received value. If more than 10 values were sent without receiving them, the program would deadlock.
 
 
 ## Channels - Direction  
@@ -71,19 +82,52 @@ me@adrianpk.com
         - They provide flexibility for communication between goroutines in various scenarios.
 
 
-## Channel Syntax - Directional Send Only
+## Channel - Receive Only
 
-.code ./channelsdirectionalsend.go
+.link https://go.dev/play/p/FuFbVCMv7T0 Go Playground
+.code ./channelsdirectionalreceive.go /START OMIT/,/END OMIT/
 
-## Channel Syntax - Directional Receive Only
+## Channel - Receive Only Explanation
+- `someFunction()` returns a read-only channel (`<-chan int`), 
+- Callers of the function can only receive values from it.
+- However, inside `someFunction()`, a bidirectional channel is created.
+- This allows `someFunction()` to send values on channel `c` within its scope.
+- When `someFunction()` returns `c` as a read-only channel, it restricts the channel's usage for callers.
+- Callers of `someFunction()` can only receive values from the returned channel.
 
-.code ./channelsdirectionalreceive.go
 
-## Channel Syntax - Bidirectional
+## Channel - Send Only
 
-.code ./channelsdirectionalreceive.go
+.link https://go.dev/play/p/y6AkgkLlduN Go Playground
+.code ./channelsdirectionalsend.go /START OMIT/,/END OMIT/
+
+
+## Channel - Send Only Explanation
+
+- `someFunction()` function creates a regular bidirectional channel c and returns it as a read-only channel (<-chan int).
+- Inside someFunction(), a goroutine sends the value 123 on channel c.
+- In `main()` function, a read-only channel is received from `someFunction()`.
+- Attempting to send data on the read-only channel would result in a compilation error.
+- Finally, the value 123 is received and printed from the read-only channel.
+
+## Channel - Bidirectional
+
+.link https://go.dev/play/p/7FAUEbVLM0M Go Playground
+.code ./channelsbidirectional.go
+
+
+## Channel - Bidirectional Explanation
+
+- The `sendData()` function sends values 1 to 5 on the bidirectional channel ch.
+- The `receiveData()` function receives and prints values from the same bidirectional channel ch.
+- Both functions operate on the same bidirectional channel, allowing communication between them.
+- In `main()` function, we create a bidirectional channel ch.
+- We start goroutines concurrently to send and receive data on the channel ch.
+- After sending all values, the `sendData()` function closes the channel ch using close(ch).
+- The `receiveData()` function exits the loop when the channel ch is closed, ensuring graceful termination.
 
 ## Select Statement
+
 - The `select` statement in Go let's orchestrate the communication between goroutines via channels.
 
 - It provides a mechanism to concurrently wait on multiple communication operations and select the first one that's ready to proceed.
@@ -95,7 +139,22 @@ me@adrianpk.com
 
 ## Select Statement Syntax
 
+.link https://go.dev/play/p/wZ8r5AMRvqB Go Playground
 .code ./select.go /START OMIT/,/END OMIT/
+
+## Select Statement Explanation
+
+- Two channels, ch1 and ch2, are created for communication between goroutines.
+- Two anonymous functions are started as goroutines. 
+- One sends a "ping" message to ch1 every 500 milliseconds.
+- The other sends a "pong" message to ch2 every 1 second.
+- We enter an infinite loop in the main() function.
+- Inside the loop, we use a select statement to receive messages from ch1 and ch2.
+- If a message is received from ch1
+    - It's printed as "Received message from ch1: [message]".
+- If a message is received from ch2:
+    - it's printed as "Received message from ch2: [message]".
+- The select statement allows the program to wait for and process messages from multiple channels concurrently without blocking.
 
 ## Mutex
 
