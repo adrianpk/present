@@ -1,0 +1,208 @@
+# Go Concurrency
+
+Adrian
+8 Mar 2024
+me@adrianpk.com
+
+## Goroutines
+
+- Lightweight concurrent units of execution.
+
+- Allows functions to run concurrently within the same address space.
+
+- Managed by the Go runtime and can be thought of as independently executing process.
+
+- Can communicate with each other via channels,
+
+- Distinct from operating system thread.
+
+- Go runtime multiplex many goroutines onto a smaller number of OS threads.
+
+- Peemptively execution, they can interrupted by the scheduler to avoid monopolizing the CPU.
+
+## Goroutines - Anonymous Functions
+
+.link https://go.dev/play/p/8_9G-qH3gxb Go Playground
+
+.code ./goroutinesanonymous.go
+
+
+## Goroutines - Named functions
+
+.link https://go.dev/play/p/AqwubODp_Zp  Go Playground
+
+.code ./goroutinesnamed.go
+
+
+## Channels
+
+- Facilitate communication and synchronization between goroutines.
+- They are typed to ensure data integrity of data transmission.
+- Operate on a blocking principle to ensure coordination between sender and receiver.
+
+- They can be either
+    - Unbuffered:
+        - Have no capacity and block until both sender and receiver are ready.
+          They ensure synchronization between sender and receiver goroutines.
+    - Buffered: 
+        - Can hold a certain number of elements before blocking: 
+          They allow sending and receiving values without requiring both sides to be ready simultaneously.
+
+## Channel - Unbuffered
+
+.link https://go.dev/play/p/424qZnSeegV Go Playground
+.code ./channelsbuffered.go
+
+## Channel - Buffered
+
+.code ./channelsbuffered.go
+
+
+## Channels - Direction  
+
+- They can be either
+
+    - Unidirectional:
+        - Restrict the operations that can be performed on them to either send or receive.
+          They enforce specific communication patterns and help prevent unintended usage.
+    
+    - Bidirectional:
+        - Allow both sending and receiving operations.
+        - They provide flexibility for communication between goroutines in various scenarios.
+
+
+## Channel Syntax - Directional Send Only
+
+.code ./channelsdirectionalsend.go
+
+## Channel Syntax - Directional Receive Only
+
+.code ./channelsdirectionalreceive.go
+
+## Channel Syntax - Bidirectional
+
+.code ./channelsdirectionalreceive.go
+
+## Select Statement
+- The `select` statement in Go let's orchestrate the communication between goroutines via channels.
+
+- It provides a mechanism to concurrently wait on multiple communication operations and select the first one that's ready to proceed.
+
+- Is non-blocking, ensuring efficient resource utilization. 
+
+- Enables dynamic selection of channels and coordinate between goroutines in Go programs.
+
+
+## Select Statement Syntax
+
+.code ./select.go /START OMIT/,/END OMIT/
+
+## Mutex
+
+- Mutex safeguard shared resources from concurrent access by multiple goroutines.
+- Ensures that only one goroutine accesses the shared resource at a time.
+- Prevents race conditions.
+- Maintaining data consistency.
+- There are also RWMutexes (read-write mutexes)
+- They enable both read-only and write-only access to shared resources.
+- Multiple goroutines to simultaneously read from a resource but ensure exclusive access during write operations.
+- Enhance performance in scenarios with frequent reads by allowing concurrent access, while still maintaining exclusivity during writes.
+
+
+## Mutex Syntax
+
+.code ./mutex.go /START OMIT/,/END OMIT/
+
+## WaitGroups
+
+- WaitGroups facilitate synchronization among goroutines
+- Allow the main goroutine to wait until all other ones have completed their tasks.
+- Operate by incrementing the WaitGroup counter.
+- Increment before launching a goroutine.
+- Decrementing it upon its completion.
+- Main goroutine can then use the `Wait()` to block until the counter reaches zero.
+- They ensure orderly execution and preventing premature termination of the program.
+
+## WaitGroups Syntax
+
+.code ./waitgroups.go /START OMIT/,/END OMIT/
+
+## ErrorGroups
+
+- ErrorGroups in Go streamline error management for concurrent operations, particularly in scenarios involving multiple goroutines.
+
+- Provide a mechanism to accumulate and handle errors reported by goroutines.
+- Are commonly used alongside WaitGroups to coordinate error reporting.
+- Goroutines can independently report errors to the ErrorGroup while continuing their work.
+- The main goroutine waits until all operations are complete before handling any accumulated errors.
+- ErrorGroup facilitate early error detection.
+- They enable more effective error handling strategies in concurrent programs.
+
+## ErrorGroup Syntax
+
+.link errorgroups.go complete source here
+.code ./errorgroups.go /START OMIT/,/END OMIT/
+
+## Race Conditions
+
+- Data races in Go happen when two or more goroutines concurrently access a shared variable without synchronization.
+- At least one of the concurrent accesses must be a write operation for a data race to occur.
+- Due Go's concurrent execution model, data races can lead to unpredictable behavior and data corruption.
+- Go provides tools like the `go run -race` command and the `sync/atomic` package to detect and prevent them.
+- Idiomatic Go code uses synchronization primitives such as channels or mutexes to coordinate access to shared variables and prevent data races.
+
+## Race Conditions Example
+
+.link raceconditions.go complete source here
+.code ./raceconditions.go /START OMIT/,/END 
+
+## Race Conditions - Preventing Using Mutexes
+
+.link raceconditionsmutex.go complete source here
+.code ./raceconditionsmutex.go /START OMIT/,/END
+
+## Race Conditions - Preventing Using Channells
+
+.link raceconditionschannels.go complete source here
+.code ./raceconditionschannels.go /START OMIT/,/END
+
+- For this particalar usecase, the use of channels is more convolutioned.
+- A simple mutex is more appropriate.
+- For more complex usescases involving multiple goroutines, channels could become more effective.
+
+
+## Worker Groups
+
+- Worker groups in Go coordinate multiple worker goroutines to perform tasks concurrently.
+- Each worker goroutine is typically assigned a specific task or subset of tasks to execute.
+- Worker groups ensure that all worker goroutines complete their assigned tasks before proceeding with subsequent operations.
+- Synchronization primitives like WaitGroups are commonly used to coordinate worker groups, allowing the main goroutine to wait until all tasks are finished.
+- Worker groups are useful for scenarios requiring parallel execution of tasks, where it's important to ensure that all tasks are completed before proceeding with subsequent steps in the program.
+
+## Worker Groups Example
+
+.link workergroups.go complete source here
+.code ./workergroups.go /START OMIT/,/END OMIT/
+
+## Worker Pools
+- Worker pools in Go manage a fixed number of worker goroutines to process tasks concurrently.
+- Tasks are submitted to a work queue, and worker goroutines continuously dequeue tasks and execute them.
+- The number of worker goroutines in the pool is typically limited to prevent resource exhaustion.
+- Worker pools efficiently utilize system resources while ensuring prompt task processing.
+- This design pattern is commonly used in concurrent programming to achieve parallelism and improve task execution efficiency.
+
+## Worker Pools Example
+
+.link workerpools.go complete source here
+.code ./workerpools.go /START OMIT/,/END OMIT/
+
+
+## Conclusion
+
+- Recap of key concepts covered.
+- Importance of understanding Go concurrency for building scalable and efficient systems.
+
+## Q&A
+
+- Something
+
