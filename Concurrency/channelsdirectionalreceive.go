@@ -2,13 +2,29 @@ package main
 
 import "fmt"
 
-func main() {
-	ch := make(<-chan int) // Create a receive-only channel // HL
+// START OMIT
+// Function F returns a read-only channel.
+func someFunction() <-chan int { // HL
+	c := make(chan int)
 
 	go func() {
-		// Attempting to send data to a receive-only channel will cause a compile-time error
-		fmt.Println(<-ch) // Receiving data from the channel
+		defer close(c)
+		c <- 123 // Send a value on the channel // HL
 	}()
 
-	fmt.Println("Data received successfully")
+	// Returning the channel as read-only.
+	return c
 }
+
+func main() {
+	// Receive a read-only channel from function F.
+	ch := someFunction()
+
+	// Attempting to send data on the receive-only channel would result in a compile-time error.
+	// ch <- 456 // HL
+
+	val := <-ch // Receive the value from the channel // HL
+	fmt.Println("Received:", val)
+}
+
+// END OMIT
