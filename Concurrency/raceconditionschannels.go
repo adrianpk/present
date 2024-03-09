@@ -9,26 +9,30 @@ func main() {
 	const numGoroutines = 1000
 
 	counter := make(chan int) // A channel for incrementing the counter
-	done := make(chan bool)   // A channel to signal when all finished
+	done := make(chan bool)   // A channel to signal when all goroutines are done
 
-	for i := 0; i < numGoroutines; i++ { // Start numGoroutines goroutines // HL
-		go func() { // HL
-			counter <- 1 // Increment the counter // HL
-			done <- true // Signal that this goroutine is done // HL
-		}() // HL
-	} // HL
-
-	for i := 0; i < numGoroutines; i++ { // Wait for all goroutines to finish
-		<-done // Receive from the done channel // HL
+	for i := 0; i < numGoroutines; i++ { // Start numGoroutines goroutines
+		go func() { // Start each goroutine
+			counter <- 1 // Increment the counter
+			done <- true // Signal that this goroutine is done
+		}()
 	}
 
-	close(counter) // Close the counter channel // HL
+	// Create a separate goroutine to close the done channel
+	go func() {
+		for i := 0; i < numGoroutines; i++ {
+			<-done // Receive from the done channel
+		}
+		close(done) // Close the done channel after all signals are received
+	}()
 
 	// Calculate the final value of the counter
 	var finalCounter int
-	for n := range counter { // Range over the counter channel values // HL
-		finalCounter += n
+	for i := 0; i < numGoroutines; i++ {
+		finalCounter += <-counter // Receive from the counter channel and accumulate
 	}
+
+	close(counter) // Close the counter channel
 
 	fmt.Println("Counter:", finalCounter)
 }

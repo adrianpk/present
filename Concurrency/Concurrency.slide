@@ -324,3 +324,12 @@ me@adrianpk.com
 - Once all jobs are submitted, the jobs channel is closed to signal that no more jobs will be sent.
 - A separate goroutine waits for all workers to finish their jobs using a `sync.WaitGroup` and then closes the results channel.
 - Results from the workers are printed as they become available by iterating over the results channel using a range loop.
+
+
+## Further Exploration
+
+.link https://pkg.go.dev/sync/atomic Atomic Primitives
+.link https://pkg.go.dev/golang.org/x/sync/syncmap Sync Map
+
+That's all Folks! 🐹
+
