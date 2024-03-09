@@ -87,7 +87,7 @@ me@adrianpk.com
 .link https://go.dev/play/p/FuFbVCMv7T0 Go Playground
 .code ./channelsdirectionalreceive.go /START OMIT/,/END OMIT/
 
-## Channel - Receive Only Explanation
+## Channel - Receive Only Explained
 - `someFunction()` returns a read-only channel (`<-chan int`), 
 - Callers of the function can only receive values from it.
 - However, inside `someFunction()`, a bidirectional channel is created.
@@ -102,7 +102,7 @@ me@adrianpk.com
 .code ./channelsdirectionalsend.go /START OMIT/,/END OMIT/
 
 
-## Channel - Send Only Explanation
+## Channel - Send Only Explained
 
 - `someFunction()` function creates a regular bidirectional channel c and returns it as a read-only channel (<-chan int).
 - Inside someFunction(), a goroutine sends the value 123 on channel c.
@@ -116,7 +116,7 @@ me@adrianpk.com
 .code ./channelsbidirectional.go
 
 
-## Channel - Bidirectional Explanation
+## Channel - Bidirectional Explained
 
 - The `sendData()` function sends values 1 to 5 on the bidirectional channel ch.
 - The `receiveData()` function receives and prints values from the same bidirectional channel ch.
@@ -142,7 +142,7 @@ me@adrianpk.com
 .link https://go.dev/play/p/wZ8r5AMRvqB Go Playground
 .code ./select.go /START OMIT/,/END OMIT/
 
-## Select Statement Explanation
+## Select Statement Explained
 
 - Two channels, ch1 and ch2, are created for communication between goroutines.
 - Two anonymous functions are started as goroutines. 
@@ -168,9 +168,30 @@ me@adrianpk.com
 - Enhance performance in scenarios with frequent reads by allowing concurrent access, while still maintaining exclusivity during writes.
 
 
-## Mutex Syntax
+## Mutex Example
 
+.link https://go.dev/play/p/mzQYj1RM14f Go Playground
 .code ./mutex.go /START OMIT/,/END OMIT/
+
+## Mutex Explained
+
+- We declare a global variable counter to hold an integer value.
+- Also a sync.Mutex to synchronize access to the counter.
+- `increment()` increments the counter variable within a critical section protected by the mutex lock.
+- Inside `main()` a loop spawns 10 goroutines, each of which calls the increment() function.
+- After all goroutines have completed, we print the final value of the counter variable.
+- Without using the mutex lock to synchronize access to the counter variable, the program may produce incorrect results due to race conditions. Multiple goroutines accessing and modifying the counter variable simultaneously can lead to data races, resulting in unpredictable output.
+
+## Mutex - Without Them
+
+.link https://go.dev/play/p/0YykfKAbtuI Go Playground
+.code ./mutexwithoutthem.go /START OMIT/,/END OMIT/
+
+## Mutex - Without Them Explained
+
+- Without using the mutex lock to synchronize access to the counter variable, the program may produce incorrect results due to race conditions.
+- Multiple goroutines accessing and modifying the counter variable simultaneously can lead to data races, resulting in unpredictable output. 
+- In this case, it's more probable that the final value of counter is less than 1000 compared to when the mutex is used.
 
 ## WaitGroups
 
@@ -199,8 +220,16 @@ me@adrianpk.com
 
 ## ErrorGroup Syntax
 
-.link errorgroups.go complete source here
+.link https://go.dev/play/p/atsxAawSe3r Go Playground
 .code ./errorgroups.go /START OMIT/,/END OMIT/
+
+## ErrorGroup Explained
+
+- `doTask()` accept an errgroup.Group.
+- In `main()` we create an `errgroup.Group`.
+- Inside the loop, we create one goroutine for each task but this time from the errgroup.
+- The `Wait()` method of errgroup.Group is used to wait for all tasks to finish and collect any errors.
+- The program prints any errors that occurred during the tasks or a success message if all tasks completed successfully.
 
 ## Race Conditions
 
@@ -212,36 +241,66 @@ me@adrianpk.com
 
 ## Race Conditions Example
 
-.link raceconditions.go complete source here
-.code ./raceconditions.go /START OMIT/,/END 
+.link https://go.dev/play/p/1ePWQGs4PL9 Go Playground
+.code ./raceconditions.go /START OMIT/,/END OMIT/
 
-## Race Conditions - Preventing Using Mutexes
+## Race Conditions - Explained
 
-.link raceconditionsmutex.go complete source here
-.code ./raceconditionsmutex.go /START OMIT/,/END
+- Inside a loop that runs 1000 times, we start multiple goroutines concurrently.
+- Each goroutine increments the counter variable without any synchronization mechanism, 
+- Due to the lack of synchronization, multiple goroutines may access and modify the counter variable simultaneously, leading to a race condition.
+- Race conditions occur when the outcome of the program depends on the timing of operations performed by concurrent threads or goroutines.
+- Finally, we print the value of the counter variable.
+- Because of the race condition, the final value of counter is unpredictable and may vary between different executions of the program.
+- It's likely that the printed value will be less than 1000 because the goroutines may overwrite each other's increments, causing some increments to be lost.
 
-## Race Conditions - Preventing Using Channells
+## Race Conditions - Preventing Using Mutex
 
-.link raceconditionschannels.go complete source here
+.link https://go.dev/play/p/52oh5NfzMxF Go Playground
+.code ./raceconditionsmutex.go /START OMIT/,/END OMIT/
+
+## Race Conditions - Preventing Using Mutex Explained
+
+- Here we use a mutex to enforce mutual exclusion when accessing the shared `counter` variable.
+- Only one goroutine can modify it at a time.
+- Each goroutine acquires the lock using `mutex.Lock()` before incrementing the `counter`.
+- After the increment, the lock is released with `mutex.Unlock()`, allowing other goroutines to proceed.
+- With mutex synchronization, all 1000 increments to the `counter` variable are executed atomically and without interference. Consequently.
+- The final value of the `counter` is guaranteed to be 1000 after running the program.
+
+## Race Conditions - Preventing Using Channels
+
+.link https://go.dev/play/p/IbUdzj9DNaK Go Playground 
 .code ./raceconditionschannels.go /START OMIT/,/END
 
-- For this particalar usecase, the use of channels is more convolutioned.
-- A simple mutex is more appropriate.
-- For more complex usescases involving multiple goroutines, channels could become more effective.
+
+## Race Conditions - Preventing Using Channels Explained
+
+- Channels are used to synchronize the execution of concurrent goroutines.
+- `counter` channel is utilized to coordinate the increment of the counter variable.
+- `done` channel is usedd to signal when all goroutines have finished their execution.
+- Each goroutine increments the counter and sends a signal (true) through the done channel to indicate completion of its task.
+- A separate goroutine is created to receive signals from all done channels.
+- Once all signals are received, the done channel is closed, allowing other goroutines to proceed.
+- As a result of the synchronization the expected outcome of obtaining a final counter value of 1000.
+- For this particalar usecase we canb see that the use of channels is more convoluted than a simple mutex.
 
 
-## Worker Groups
+## Context Cancelation
 
-- Worker groups in Go coordinate multiple worker goroutines to perform tasks concurrently.
-- Each worker goroutine is typically assigned a specific task or subset of tasks to execute.
-- Worker groups ensure that all worker goroutines complete their assigned tasks before proceeding with subsequent operations.
-- Synchronization primitives like WaitGroups are commonly used to coordinate worker groups, allowing the main goroutine to wait until all tasks are finished.
-- Worker groups are useful for scenarios requiring parallel execution of tasks, where it's important to ensure that all tasks are completed before proceeding with subsequent steps in the program.
+.link https://go.dev/play/p/dbSBSAIkPUH Go Playground
+.code ./contextcancellation.go /START OMIT/,/END OMIT/
 
-## Worker Groups Example
+## Context Cancellation Explained
 
-.link workergroups.go complete source here
-.code ./workergroups.go /START OMIT/,/END OMIT/
+- There are two goroutines, task1 and task2, each performing some simulated processing.
+- A context is created in the main function, which will be used to manage the cancellation of the goroutines.
+- Goroutines periodically check for cancellation using <-ctx.Done(), and exit gracefully when the context is cancelled.
+- A ticker is created to trigger a timeout after 3 seconds.
+- If the timeout occurs before the goroutines complete their tasks, the context is also cancelled.
+- The select statement waits for either the timeout from the ticker or the cancellation of the context.
+- Whichever happens first will cause the main function to exit.
+- Upon cancellation of the context, the defer cancel() ensures that the context is properly cleaned up when the main function exits.
 
 ## Worker Pools
 - Worker pools in Go manage a fixed number of worker goroutines to process tasks concurrently.
@@ -252,16 +311,16 @@ me@adrianpk.com
 
 ## Worker Pools Example
 
-.link workerpools.go complete source here
-.code ./workerpools.go /START OMIT/,/END OMIT/
+.link https://go.dev/play/p/H2lxXceu6i1 Go Playground
+.code ./workerpools.go  /START OMIT/,/END OMIT/
 
-
-## Conclusion
-
-- Recap of key concepts covered.
-- Importance of understanding Go concurrency for building scalable and efficient systems.
-
-## Q&A
-
-- Something
-
+## Worker Pools Explained
+- The program defines a worker function responsible for processing jobs
+- The jobs are sent through a channel.
+- The results are also sent through a results channel.
+- In the main function, worker goroutines are spawned based on the specified number of workers.
+- Jobs are sent to the worker pool through a buffered jobs channel.
+- Each worker goroutine processes incoming jobs concurrently.
+- Once all jobs are submitted, the jobs channel is closed to signal that no more jobs will be sent.
+- A separate goroutine waits for all workers to finish their jobs using a `sync.WaitGroup` and then closes the results channel.
+- Results from the workers are printed as they become available by iterating over the results channel using a range loop.

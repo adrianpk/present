@@ -7,46 +7,46 @@ import (
 )
 
 // START OMIT
-func worker(id int, jobs <-chan int, results chan<- int) { // HL
-	for job := range jobs { // HL
+func worker(id int, jobs <-chan int, results chan<- int) {
+	for job := range jobs {
 		fmt.Printf("Worker %d processing job %d\n", id, job)
 		time.Sleep(time.Second) // Simulate some work
 		results <- job * 2      // Send the result back to the results channel
-	} // HL
-} // HL
+	}
+}
 
 func main() {
 	const numJobs = 5
 	const numWorkers = 3
 
-	jobs := make(chan int, numJobs)    // HL
-	results := make(chan int, numJobs) // HL
+	jobs := make(chan int, numJobs)
+	results := make(chan int, numJobs)
 
-	var wg sync.WaitGroup              // HL
-	for i := 1; i <= numWorkers; i++ { // HL
-		wg.Add(1)               // HL
-		go func(workerID int) { // Start a worker goroutine // HL
-			defer wg.Done()                 // Signal to the WaitGroup that this worker has finished // HL
-			worker(workerID, jobs, results) // Start the worker // HL
-		}(i) // HL
-	} // HL
+	var wg sync.WaitGroup
+	for i := 1; i <= numWorkers; i++ {
+		wg.Add(1)
+		go func(workerID int) { // Start a worker goroutine
+			defer wg.Done()                 // Signal to the WaitGroup that this worker has finished
+			worker(workerID, jobs, results) // Start the worker
+		}(i)
+	}
 
 	// Send jobs to the worker pool
-	for i := 1; i <= numJobs; i++ { // HL
-		jobs <- i // Send the job to the jobs channel // HL
-	} // HL
-	close(jobs) // Close the jobs channel to signal that all jobs have been submitted // HL
+	for i := 1; i <= numJobs; i++ {
+		jobs <- i // Send the job to the jobs channel
+	}
+	close(jobs) // Close the jobs channel to signal that all jobs have been submitted
 
 	// Collect results from the worker pool
-	go func() { // HL
-		wg.Wait()      // Wait for all workers to finish // HL
-		close(results) // Close the results channel after all workers have completed // HL
-	}() // HL
+	go func() {
+		wg.Wait()      // Wait for all workers to finish
+		close(results) // Close the results channel after all workers have completed
+	}()
 
 	// Print the results
-	for result := range results { // HL
-		fmt.Println("Result:", result) // HL
-	} // HL
+	for result := range results {
+		fmt.Println("Result:", result)
+	}
 }
 
 // END OMIT
